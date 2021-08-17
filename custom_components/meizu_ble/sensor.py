@@ -1,22 +1,16 @@
 from datetime import timedelta
 import logging
 
-import board
 import voluptuous as vol
 
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import (
-    CONF_MONITORED_CONDITIONS,
     CONF_NAME,
-    CONF_PIN,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
     PERCENTAGE,
-    TEMP_FAHRENHEIT,
 )
 import homeassistant.helpers.config_validation as cv
-from homeassistant.util import Throttle
-from homeassistant.util.temperature import celsius_to_fahrenheit
 
 from .meizu import MZBtIr
 
@@ -46,7 +40,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
 
-    data = MZBtIr('蓝牙MAC地址')
+    data = MZBtIr('68:3E:34:CC:E0:67')
     dev = [
         MeizuBLESensor(
                     data,
@@ -106,5 +100,5 @@ class MeizuBLESensor(SensorEntity):
         # 显示数据
         if self.type == SENSOR_TEMPERATURE:
             self._state = self.client.temperature()
-        elif self.type == SENSOR_HUMIDITY and SENSOR_HUMIDITY in data:
+        elif self.type == SENSOR_HUMIDITY:
             self._state = self.client.humidity()
