@@ -45,7 +45,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
     mac = config.get(CONF_MAC)
-    _LOGGER.info(mac)
+    _LOGGER.info(config)
     data = MZBtIr(mac)
     # 定时更新
     def interval(now):
