@@ -92,6 +92,10 @@ class MeizuBLESensor(SensorEntity):
         self._attr_device_class = SENSOR_TYPES[sensor_type][2]
 
     @property
+    def unique_id(self):
+        return f"{self.client._mac} {self._name}"
+
+    @property
     def name(self):
         """Return the name of the sensor."""
         return f"{self.client_name} {self._name}"
