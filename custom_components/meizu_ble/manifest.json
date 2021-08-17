@@ -4,7 +4,9 @@
     "version": "1.0",
     "config_flow": false,
     "documentation": "https://github.com/shaonianzhentan/meizu_ble",
-    "requirements": [],
+    "requirements": [
+        "bluepy==1.3.0"
+    ],
     "dependencies": [],
     "codeowners": [
         "@shaonianzhentan"
