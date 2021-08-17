@@ -5,3 +5,10 @@
 本插件是基于原作者的研究进行套壳接入HA，关于设备的整体操作与获取，请参考原作者代码
 
 原项目地址：https://github.com/junnikokuki/Meizu-BLE-Thermometer
+
+
+```yaml
+sensor:
+  - platform: meizu_ble
+    mac: '68:3E:34:CC:E0:67'
+```

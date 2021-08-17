@@ -6,6 +6,7 @@ import voluptuous as vol
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import (
     CONF_NAME,
+    CONF_MAC,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
     PERCENTAGE,
@@ -30,6 +31,7 @@ SENSOR_TYPES = {
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
+        vol.Required(CONF_MAC): cv.string,
         vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string
     }
 )
@@ -40,7 +42,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
 
-    data = MZBtIr('68:3E:34:CC:E0:67')
+    data = MZBtIr(config.get(CONF_MAC))
     dev = [
         MeizuBLESensor(
                     data,
