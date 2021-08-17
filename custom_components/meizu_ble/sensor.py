@@ -1,8 +1,9 @@
 from datetime import timedelta
-import logging
+import logging, datetime
 
 import voluptuous as vol
 
+from homeassistant.helpers.event import track_time_interval, async_call_later
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import (
     CONF_NAME,
@@ -28,6 +29,8 @@ SENSOR_TYPES = {
     SENSOR_HUMIDITY: ["Humidity", PERCENTAGE, DEVICE_CLASS_HUMIDITY],
 }
 
+# 定时器时间
+TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=30)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -41,8 +44,15 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
+    mac = config.get(CONF_MAC)
+    _LOGGER.info(mac)
+    data = MZBtIr(mac)
+    # 定时更新
+    def interval(now):
+        data.update()
 
-    data = MZBtIr(config.get(CONF_MAC))
+    track_time_interval(hass, interval, TIME_BETWEEN_UPDATES)
+
     dev = [
         MeizuBLESensor(
                     data,
@@ -97,8 +107,6 @@ class MeizuBLESensor(SensorEntity):
         return self._unit_of_measurement
 
     def update(self):
-        """Get the latest data from the DHT and updates the states."""
-        self.client.update()
         # 显示数据
         if self.type == SENSOR_TEMPERATURE:
             self._state = self.client.temperature()
