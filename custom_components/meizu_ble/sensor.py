@@ -3,7 +3,6 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.helpers import device_registry as dr
 from homeassistant.helpers.event import track_time_interval
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import (
@@ -20,8 +19,6 @@ from .meizu import MZBtIr
 
 _LOGGER = logging.getLogger(__name__)
 
-DOMAIN = 'meizu_ble'
-MODEL = 'Meizu'
 DEFAULT_NAME = "魅族智能遥控器"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
@@ -80,19 +77,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
 
     track_time_interval(hass, interval, MIN_TIME_BETWEEN_UPDATES)
     # 添加实体
-    add_entities(dev, True)    
-    # 注册设备
-    device_registry = dr.async_get(hass)
-    device_registry.async_get_or_create(
-        config_entry_id=f"{DOMAIN}{mac}",
-        connections={(DOMAIN, MODEL)},
-        identifiers={(DOMAIN, MODEL)},
-        manufacturer="魅族",
-        suggested_area="客厅",
-        name=name,
-        model=MODEL,
-        sw_version="1.0",
-    )
+    add_entities(dev, True)
     
 class MeizuBLESensor(SensorEntity):
     """Implementation of the DHT sensor."""
@@ -145,16 +130,3 @@ class MeizuBLESensor(SensorEntity):
         # 数据大于0，则更新
         if state > 0:
             self._state = state
-
-    @property
-    def device_info(self):
-        return {
-            "identifiers": {
-                (DOMAIN, MODEL)
-            },
-            "name": "魅族智能遥控器",
-            "manufacturer": "魅族",
-            "model": MODEL,
-            "sw_version": "1.0",
-            "via_device": (DOMAIN, MODEL),
-        }
