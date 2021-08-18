@@ -68,10 +68,10 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
                     name,
                 )
     ]
-    
+
     # 定时更新
     def interval(now):
-        data.update()
+        client.update()
         for ble in dev:
             ble.update()
 
