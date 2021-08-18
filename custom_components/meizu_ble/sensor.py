@@ -10,6 +10,7 @@ from homeassistant.const import (
     CONF_MAC,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
+    DEVICE_CLASS_BATTERY,
     PERCENTAGE,
 )
 import homeassistant.helpers.config_validation as cv
@@ -24,9 +25,12 @@ MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_HUMIDITY = "humidity"
+SENSOR_BATTERY = "battery"
+
 SENSOR_TYPES = {
     SENSOR_TEMPERATURE: ["温度", None, DEVICE_CLASS_TEMPERATURE],
     SENSOR_HUMIDITY: ["湿度", PERCENTAGE, DEVICE_CLASS_HUMIDITY],
+    SENSOR_BATTERY: ["电量", PERCENTAGE, DEVICE_CLASS_BATTERY],    
 }
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
@@ -55,6 +59,12 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
                     client,
                     SENSOR_HUMIDITY,
                     SENSOR_TYPES[SENSOR_HUMIDITY][1],
+                    name,
+                ),
+        MeizuBLESensor(
+                    client,
+                    SENSOR_BATTERY,
+                    SENSOR_TYPES[SENSOR_BATTERY][1],
                     name,
                 )
     ]
@@ -115,3 +125,5 @@ class MeizuBLESensor(SensorEntity):
             self._state = self.client.temperature()
         elif self.type == SENSOR_HUMIDITY:
             self._state = self.client.humidity()
+        elif self.type == SENSOR_BATTERY:
+            self._state = self.client.battery()
