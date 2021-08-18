@@ -3,7 +3,7 @@ import logging
 
 import voluptuous as vol
 
-from homeassistant.helpers.event import track_time_interval, async_call_later
+from homeassistant.helpers.event import track_time_interval
 from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import (
     CONF_NAME,
@@ -19,6 +19,7 @@ from .meizu import MZBtIr
 
 _LOGGER = logging.getLogger(__name__)
 
+DOMAIN = 'meizu_ble'
 DEFAULT_NAME = "魅族智能遥控器"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
@@ -120,24 +121,28 @@ class MeizuBLESensor(SensorEntity):
         return self._unit_of_measurement
 
     def update(self):
+        state = 0
         # 显示数据
         if self.type == SENSOR_TEMPERATURE:
-            self._state = self.client.temperature()
+            state = self.client.temperature()
         elif self.type == SENSOR_HUMIDITY:
-            self._state = self.client.humidity()
+            state = self.client.humidity()
         elif self.type == SENSOR_BATTERY:
-            self._state = self.client.battery()
+            state = self.client.battery()
+        # 数据大于0，则更新
+        if state > 0:
+            self._state = state
 
     @property
     def device_info(self):
         model = 'Meizu'
         return {
             "identifiers": {
-                (model, self.unique_id)
+                (DOMAIN, model)
             },
             "name": "魅族智能遥控器",
             "manufacturer": "魅族",
             "model": model,
             "sw_version": "1.0",
-            "via_device": (model, self.unique_id),
+            "via_device": (DOMAIN, model),
         }
