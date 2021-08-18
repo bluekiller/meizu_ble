@@ -42,17 +42,17 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
     mac = config.get(CONF_MAC)
-    data = MZBtIr(mac)
+    client = MZBtIr(mac)
 
     dev = [
         MeizuBLESensor(
-                    data,
+                    client,
                     SENSOR_TEMPERATURE,
                     SENSOR_TYPES[SENSOR_TEMPERATURE][1],
                     name,
                 ),
         MeizuBLESensor(
-                    data,
+                    client,
                     SENSOR_HUMIDITY,
                     SENSOR_TYPES[SENSOR_HUMIDITY][1],
                     name,
@@ -100,12 +100,12 @@ class MeizuBLESensor(SensorEntity):
         return f"{self.client_name}{self._name}"
 
     @property
-    def native_value(self):
+    def state(self):
         """Return the state of the sensor."""
         return self._state
 
     @property
-    def native_unit_of_measurement(self):
+    def unit_of_measurement(self):
         """Return the unit of measurement of this entity, if any."""
         return self._unit_of_measurement
 
