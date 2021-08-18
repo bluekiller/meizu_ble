@@ -1,6 +1,6 @@
 {
     "domain": "meizu_ble",
-    "name": "\u9B45\u65CF\u6E29\u6E7F\u5EA6\u7EA2\u5916\u9065\u63A7\u5668",
+    "name": "\u9B45\u65CF\u667A\u80FD\u9065\u63A7\u5668",
     "version": "1.0",
     "config_flow": false,
     "documentation": "https://github.com/shaonianzhentan/meizu_ble",

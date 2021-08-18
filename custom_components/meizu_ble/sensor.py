@@ -1,5 +1,5 @@
 from datetime import timedelta
-import logging, datetime
+import logging
 
 import voluptuous as vol
 
@@ -18,19 +18,16 @@ from .meizu import MZBtIr
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = "魅族传感器"
+DEFAULT_NAME = "魅族智能遥控器"
 
 MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
 
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_HUMIDITY = "humidity"
 SENSOR_TYPES = {
-    SENSOR_TEMPERATURE: ["Temperature", None, DEVICE_CLASS_TEMPERATURE],
-    SENSOR_HUMIDITY: ["Humidity", PERCENTAGE, DEVICE_CLASS_HUMIDITY],
+    SENSOR_TEMPERATURE: ["温度", None, DEVICE_CLASS_TEMPERATURE],
+    SENSOR_HUMIDITY: ["湿度", PERCENTAGE, DEVICE_CLASS_HUMIDITY],
 }
-
-# 定时器时间
-TIME_BETWEEN_UPDATES = datetime.timedelta(seconds=30)
 
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
@@ -45,13 +42,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
     mac = config.get(CONF_MAC)
-    _LOGGER.info(config)
     data = MZBtIr(mac)
-    # 定时更新
-    def interval(now):
-        data.update()
-
-    track_time_interval(hass, interval, TIME_BETWEEN_UPDATES)
 
     dev = [
         MeizuBLESensor(
@@ -67,6 +58,14 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
                     name,
                 )
     ]
+    
+    # 定时更新
+    def interval(now):
+        data.update()
+        for ble in dev:
+            ble.update()
+
+    track_time_interval(hass, interval, MIN_TIME_BETWEEN_UPDATES)
 
     add_entities(dev, True)
 
@@ -90,16 +89,15 @@ class MeizuBLESensor(SensorEntity):
         self._state = None
         self._unit_of_measurement = SENSOR_TYPES[sensor_type][1]
         self._attr_device_class = SENSOR_TYPES[sensor_type][2]
-        self.update()
 
     @property
     def unique_id(self):
-        return f"{self.client._mac} {self._name}"
+        return f"{self.client._mac}{self.type}"
 
     @property
     def name(self):
         """Return the name of the sensor."""
-        return f"{self.client_name} {self._name}"
+        return f"{self.client_name}{self._name}"
 
     @property
     def native_value(self):
