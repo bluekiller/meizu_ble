@@ -127,3 +127,17 @@ class MeizuBLESensor(SensorEntity):
             self._state = self.client.humidity()
         elif self.type == SENSOR_BATTERY:
             self._state = self.client.battery()
+
+    @property
+    def device_info(self):
+        model = 'Meizu'
+        return {
+            "identifiers": {
+                (model, self.unique_id)
+            },
+            "name": "魅族智能遥控器",
+            "manufacturer": "魅族",
+            "model": model,
+            "sw_version": "1.0",
+            "via_device": (model, self.unique_id),
+        }
