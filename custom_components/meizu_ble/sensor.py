@@ -8,6 +8,7 @@ from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
 from homeassistant.const import (
     CONF_NAME,
     CONF_MAC,
+    CONF_SCAN_INTERVAL,
     DEVICE_CLASS_HUMIDITY,
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_BATTERY,
@@ -21,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = "魅族智能遥控器"
 
-MIN_TIME_BETWEEN_UPDATES = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(seconds=30)
 
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_HUMIDITY = "humidity"
@@ -36,7 +37,8 @@ SENSOR_TYPES = {
 PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     {
         vol.Required(CONF_MAC): cv.string,
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string
+        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
+        vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
     }
 )
 
@@ -75,7 +77,7 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
         for ble in dev:
             ble.update()
 
-    track_time_interval(hass, interval, MIN_TIME_BETWEEN_UPDATES)
+    track_time_interval(hass, interval, config.get(CONF_SCAN_INTERVAL))
     # 添加实体
     add_entities(dev, True)
     

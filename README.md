@@ -10,8 +10,24 @@
 > 配置
 
 ```yaml
+# 基础配置
 sensor:
   - platform: meizu_ble
+    mac: '68:3E:34:CC:E0:67'
+
+
+# 完整配置
+sensor:
+  - platform: meizu_ble
+    name: 魅族智能遥控器
+    mac: '68:3E:34:CC:E0:67'
+    scan_interval: 30
+
+
+# 遥控器（没做完）
+remote:
+  - platform: meizu_ble
+    name: 魅族智能遥控器  
     mac: '68:3E:34:CC:E0:67'
 ```
 
