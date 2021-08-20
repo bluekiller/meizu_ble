@@ -49,3 +49,29 @@ group:
       - sensor.mei_zu_zhi_neng_yao_kong_qi_shi_du
       - sensor.mei_zu_zhi_neng_yao_kong_qi_dian_liang
 ```
+
+> 已知问题
+
+树莓派的蓝牙有点辣鸡，可能会有获取失败的情况发生，这个时候一般重启蓝牙就好了
+
+```bash
+# 关闭蓝牙
+sudo hciconfig hci0 down
+
+# 打开蓝牙
+sudo hciconfig hci0 up
+
+# 如果报下面这个异常的话，就执行下面的命令
+# Can't init device hci0: Connection timed out (110)
+
+rfkill block bluetooth
+
+rfkill unblock bluetooth
+
+sudo hciconfig hci0 up
+
+# 一般重启蓝牙后，过30秒就会显示信息了
+# 如果还是不行的话，那对不起，告辞，再见
+```
+
+   
