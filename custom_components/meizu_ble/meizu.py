@@ -73,8 +73,7 @@ class MZBtIr(object):
                 p.disconnect()
             except Exception as ex:
                 print("Unexpected error: {}".format(ex))
-                if p is not None:
-                    p.disconnect()
+                p.disconnect()
             finally:
                 self._lock.release()
 
@@ -118,8 +117,7 @@ class MZBtIr(object):
             p.disconnect()
         except Exception as ex:
             print("Unexpected error: {}".format(ex))
-            if p is not None:
-                p.disconnect()
+            p.disconnect()
         finally:
             self._lock.release()
         return sent
