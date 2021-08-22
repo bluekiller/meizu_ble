@@ -86,7 +86,7 @@ class MZBtIr(object):
             for ch in chList:
                 if str(ch.uuid) == SERVICE_UUID:
                     sequence = self.get_sequence()
-                    if p.writeCharacteristic(ch.getHandle(), b'\x55' + bytes(len(a2b_hex(key)) + 3, [sequence]) + b'\x03' + a2b_hex(key), True):
+                    if p.writeCharacteristic(ch.getHandle(), b'\x55' + bytes([len(a2b_hex(key)) + 3, sequence]) + b'\x03' + a2b_hex(key), True):
                         data = ch.read()
                         if len(data) == 5 and data[4] == 1:
                             sent = True
@@ -95,7 +95,7 @@ class MZBtIr(object):
                             packet_count = int(len(ir_data) / 30) + 1
                             if len(data) % 30 != 0:
                                 packet_count = packet_count + 1
-                            send_list.append(b'\x55' + bytes(len(a2b_hex(key)) + 5, [sequence]) + b'\x00' + bytes([0, packet_count]) + a2b_hex(key))
+                            send_list.append(b'\x55' + bytes([len(a2b_hex(key)) + 5, sequence]) + b'\x00' + bytes([0, packet_count]) + a2b_hex(key))
                             i = 0
                             while i < packet_count - 1:
                                 send_ir_data = None

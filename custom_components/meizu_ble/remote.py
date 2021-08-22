@@ -3,6 +3,8 @@ import logging
 import voluptuous as vol
 from datetime import timedelta
 from homeassistant.util.dt import utcnow
+from .shaonianzhentan import save_yaml, load_yaml
+from .meizu import MZBtIr
 
 from homeassistant.components.remote import (
     PLATFORM_SCHEMA,
@@ -38,7 +40,8 @@ class MeizuRemote(RemoteEntity):
         self.hass = hass
         self._mac = mac
         self._name = name
-        self.device = MZBtIr(mac)
+        self.config_file = hass.config.path("custom_components/meizu_ble/ir.yaml")
+        self.ble = MZBtIr(mac)
 
     @property
     def name(self):
@@ -63,7 +66,18 @@ class MeizuRemote(RemoteEntity):
          """Turn the remote off."""
          
     async def async_send_command(self, command, **kwargs):
+        device = kwargs.get('device', '')
+        if device == '':
+            return
         key = command[0]
+        # 读取配置文件
+        command_list = load_yaml(self.config_file)
+        dev = command_list.get(device, {})
+        # 判断配置是否存在
+        if key in dev:
+            ir = dev[key]
+            arr = ir.split(':')
+            self.ble.sendIr(arr[0], arr[1])
 
     async def async_learn_command(self, **kwargs):
-        command = kwargs.get('command', '')       
+        command = kwargs.get('command', '')
