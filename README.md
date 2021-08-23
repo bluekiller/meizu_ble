@@ -35,6 +35,25 @@ remote:
 
 由于录码比较繁琐，建议大家贡献自己录的码，然后集成到插件之中使用
 
+以面是对应的设备与命令，通过调用 `remote.send_command` 服务传入设备与命令即可
+
+```yaml
+海信HZ65U7E:
+  power: 开关机
+  up: 上
+  down: 下
+  left: 左
+  right: 右
+  source: 信号来源
+  enter: 确认
+  back: 返回
+  menu: 菜单
+  volumedown: 音量减小
+  volumeup: 音量增加
+  mute: 静音
+  sleep: 休眠
+```
+
 > 分组
 
 ```yaml

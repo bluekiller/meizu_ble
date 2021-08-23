@@ -75,7 +75,7 @@ class MeizuRemote(RemoteEntity):
         dev = command_list.get(device, {})
         # 判断配置是否存在
         if key in dev:
-            ir = dev[key]
+            ir = dev[key].strip()
             arr = ir.split(':')
             self.ble.sendIr(arr[0], arr[1])
 
