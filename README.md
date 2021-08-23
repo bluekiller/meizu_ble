@@ -19,8 +19,8 @@
 1. 再拨号盘输入一次  `*#*#5959#*#*`
 1. 等待大概半分钟，在文件管理器中 `/sdcard/MIUI/debug_log`下会生成`bugreport-当前时间.zip`调试文件
 1. 解压调试文件，然后找到解压目录中的文件 `common/com.android.bluetooth/btsnoop_hci.log`
-1. 将原作者的项目clone到本地
-1. 将 `btsnoop_hci.log` 拷贝到电脑上原作者项目里的`meizu_ir_reader_from_android`文件夹之中
+1. 将原项目clone到本地
+1. 将 `btsnoop_hci.log` 拷贝到电脑上原项目里的`meizu_ir_reader_from_android`文件夹之中
 1. 然后执行`python3 irdatareader.py -f btsnoop_hci.log`（缺啥依赖，自行安装）
 1. 如果没啥毛病，就会显示红外码了
 
