@@ -23,6 +23,7 @@ class MZBtIr(object):
         self._temperature = None
         self._humidity = None
         self._battery = None
+        self._voltage = None
         self._receive_handle = None
         self._receive_buffer = None
         self._received_packet = 0
@@ -45,9 +46,14 @@ class MZBtIr(object):
         return self._humidity
 
     def battery(self):
-        if self._battery == None:
+        if self._battery == None or self._battery < 0:
             return 0
         return self._battery
+
+    def voltage(self):
+        if self._voltage == None:
+            return 0
+        return self._voltage
 
     def update(self, force_update=False):
         if force_update or (self._last_update is None) or (datetime.now() - self._min_update_inteval > self._last_update):
@@ -68,7 +74,9 @@ class MZBtIr(object):
                             if p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10', True):
                                 data = ch.read()
                                 battery10 = data[4]
-                                self._battery = float(battery10) / 10.0
+                                self._voltage = float(battery10) / 10.0
+                                # 根据运行电压2.3V - 3.6V区间计算
+                                self._battery = int((self._voltage - 2.3) / 1.3 * 100)
                         break
                 p.disconnect()
             except Exception as ex:
