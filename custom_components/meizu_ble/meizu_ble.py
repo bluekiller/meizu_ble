@@ -1,6 +1,7 @@
 import paho.mqtt.client as mqtt
 import json, time, hashlib, threading, random
 from shaonianzhentan import load_yaml
+from meizu import MZBtIr
 
 def md5(text):
     data = hashlib.md5(text.encode('utf-8')).hexdigest()
@@ -14,6 +15,7 @@ HOST = config_mqtt['host']
 PORT = int(config_mqtt['port'])
 USERNAME = config_mqtt['user']
 PASSWORD = config_mqtt['password']
+SCAN_INTERVAL = 40
 # 读取红外码
 config_ir = load_yaml('ir.yaml')
 
@@ -37,15 +39,22 @@ def auto_publish():
         mac = config_meizu['mac']
         # 获取设备信息
         # print(mac)
-        temperature = random.randint(0, 100)
-        humidity = random.randint(0, 100)
-        battery = random.randint(0, 100)
-        client.publish(f"meizu_ble/{mac}/temperature", payload=temperature, qos=0)
-        client.publish(f"meizu_ble/{mac}/humidity", payload=humidity, qos=0)
-        client.publish(f"meizu_ble/{mac}/battery", payload=battery, qos=0)
+        try:
+            ble = MZBtIr(mac)
+            ble.update()
+            temperature = ble.temperature()
+            humidity = ble.humidity()
+            battery = ble.battery()
+            client.publish(f"meizu_ble/{mac}/temperature", payload=temperature, qos=0)
+            client.publish(f"meizu_ble/{mac}/humidity", payload=humidity, qos=0)
+            client.publish(f"meizu_ble/{mac}/battery", payload=battery, qos=0)
+            time.sleep(2)
+        except Exception as ex:
+            print(f"{mac}：出现异常")
+            print(ex)
 
     global timer
-    timer = threading.Timer(30, auto_publish)
+    timer = threading.Timer(SCAN_INTERVAL, auto_publish)
     timer.start()
 
 def on_connect(client, userdata, flags, rc):

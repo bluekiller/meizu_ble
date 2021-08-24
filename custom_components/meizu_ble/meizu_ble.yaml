@@ -5,8 +5,6 @@ mqtt:
   password: ''
 meizu:
   - name: 魅族智能遥控器
+    mac: 68:3E:34:CC:E5:3F
+  - name: 魅族智能遥控器
     mac: 68:3E:34:CC:E0:67
-  - name: 客厅
-    mac: 68:3E:34:CC:E0:68
-  - name: 卧室
-    mac: 68:3E:34:CC:E0:69

@@ -117,8 +117,9 @@ sudo hciconfig hci0 up
 在非树莓派的环境之中，有些设备有蓝牙模块，但因为版本型号的关系，可能无法在docker内部编译`bluepy`这个依赖
 如果在系统之中可以编译这个依赖，可以使用MQTT方式接入
 
-```yaml
-正在开发中...
-
+```bash
+# 安装MQTT依赖
+pip3 install paho-mqtt pyyaml
+# 运行主程序
 python3 meizu_ble.py
 ```
