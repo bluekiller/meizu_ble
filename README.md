@@ -118,8 +118,13 @@ sudo hciconfig hci0 up
 如果在系统之中可以编译这个依赖，可以使用MQTT方式接入
 
 ```bash
-# 安装MQTT依赖
-pip3 install paho-mqtt pyyaml
+# 安装相关依赖
+pip3 install bluepy paho-mqtt pyyaml
+
+# 修改 meizu_ble.yaml 配置文件
+
 # 运行主程序
 python3 meizu_ble.py
+
+# 可能会有异常情况，需要等待一小会，默认40秒轮询一次
 ```
