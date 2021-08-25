@@ -46,6 +46,7 @@ class MZBtIr(object):
 
     def battery(self):
         v = self.voltage()
+        '''
         if v > 3:
             return 100
         elif v > 2.98:
@@ -60,7 +61,9 @@ class MZBtIr(object):
             return 10
         elif v > 2:
             return 1
-        return 0
+        '''
+        # 根据运行电压2.3V - 3.6V区间计算
+        return int((v - 2.3) / 1.3 * 100)
 
     def voltage(self):
         if self._battery == None:
