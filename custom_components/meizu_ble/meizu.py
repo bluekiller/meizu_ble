@@ -58,6 +58,7 @@ class MZBtIr(object):
     def update(self, force_update=False):
         if force_update or (self._last_update is None) or (datetime.now() - self._min_update_inteval > self._last_update):
             self._lock.acquire()
+            p = None
             try:
                 p = Peripheral(self._mac, "public")
                 chList = p.getCharacteristics()
@@ -81,13 +82,15 @@ class MZBtIr(object):
                 p.disconnect()
             except Exception as ex:
                 print("Unexpected error: {}".format(ex))
-                p.disconnect()
             finally:
+                if p is not None:
+                    p.disconnect()
                 self._lock.release()
 
     def sendIr(self, key, ir_data):
         self._lock.acquire()
         sent = False
+        p = None
         try:
             p = Peripheral(self._mac, "public")
             chList = p.getCharacteristics()
@@ -125,8 +128,9 @@ class MZBtIr(object):
             p.disconnect()
         except Exception as ex:
             print("Unexpected error: {}".format(ex))
-            p.disconnect()
         finally:
+            if p is not None:
+                p.disconnect()
             self._lock.release()
         return sent
 
