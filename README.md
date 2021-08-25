@@ -126,6 +126,17 @@ pip3 install bluepy paho-mqtt pyyaml
 # 运行主程序
 python3 meizu_ble.py
 
+
+```
+
+```bash
 # 如果有安装NodeJs环境，可以使用pm2开机启动管理
 pm2 start meizu_ble.py -x --interpreter python3
+
+# 重启
+pm2 restart meizu_ble
+
+# 查看日志
+pm2 logs meizu_ble
+
 ```
