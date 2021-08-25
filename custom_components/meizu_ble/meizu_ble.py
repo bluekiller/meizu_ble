@@ -47,9 +47,15 @@ def auto_publish():
             temperature = ble.temperature()
             humidity = ble.humidity()
             battery = ble.battery()
+            voltage = ble.voltage()
             client.publish(f"meizu_ble/{mac}/temperature", payload=temperature, qos=0)
             client.publish(f"meizu_ble/{mac}/humidity", payload=humidity, qos=0)
             client.publish(f"meizu_ble/{mac}/battery", payload=battery, qos=0)
+            attrs = {
+                'voltage': voltage,
+                'mac': mac
+            }
+            client.publish(f"meizu_ble/{mac}/battery/attrs", payload=json.dumps(attrs), qos=0)
             time.sleep(2)
         except Exception as ex:
             print(f"{mac}：出现异常")
@@ -100,6 +106,7 @@ def discovery_config():
             "unique_id": md5(f"{mac}电量"),
             "name": f"{name}电量",
             "state_topic": f"meizu_ble/{mac}/battery",
+            "json_attributes_topic": f"meizu_ble/{mac}/battery/attrs",
             "unit_of_measurement": "%",
             "device_class": "battery"
         }, mac)

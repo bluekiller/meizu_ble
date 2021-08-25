@@ -1,4 +1,4 @@
-import sys
+import sys, time
 from bluepy.btle import Peripheral
 from binascii import a2b_hex
 from threading import Lock
@@ -93,7 +93,7 @@ class MZBtIr(object):
                                 self._battery = float(battery10) / 10.0
                         break
             except Exception as ex:
-                print("Unexpected error: {}".format(ex))
+                print("【{}】Unexpected error: {}".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ex))
             finally:
                 if p is not None:
                     p.disconnect()
@@ -143,7 +143,7 @@ class MZBtIr(object):
                                 sent = True
                     break
         except Exception as ex:
-            print("Unexpected error: {}".format(ex))
+            print("【{}】Unexpected error: {}".format(time.strftime("%Y-%m-%d %H:%M:%S", time.localtime()), ex))
         finally:
             if p is not None:
                 p.disconnect()
