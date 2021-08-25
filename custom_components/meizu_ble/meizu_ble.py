@@ -27,7 +27,7 @@ def auto_config(domain, data, mac):
         "device":{
             "name": "魅族智能遥控器",
             "identifiers": [ mac ],
-            "model": "MeizuBLE",
+            "model": mac,
             "sw_version": "1.0",
             "manufacturer":"shaonianzhentan"
         },
