@@ -16,6 +16,8 @@ PORT = int(config_mqtt['port'])
 USERNAME = config_mqtt['user']
 PASSWORD = config_mqtt['password']
 SCAN_INTERVAL = 40
+# 自动发现
+discovery_topic = "ha-mqtt/discovery"
 # 读取红外码
 config_ir = load_yaml('ir.yaml')
 
@@ -57,8 +59,8 @@ def auto_publish():
     timer = threading.Timer(SCAN_INTERVAL, auto_publish)
     timer.start()
 
-def on_connect(client, userdata, flags, rc):
-    print("Connected with result code "+str(rc))
+# 自动发现配置
+def discovery_config():
     options = []
     for key in config_ir:
         for ir_key in config_ir[key]:
@@ -102,6 +104,10 @@ def on_connect(client, userdata, flags, rc):
             "device_class": "battery"
         }, mac)
 
+def on_connect(client, userdata, flags, rc):
+    print("Connected with result code "+str(rc))
+    client.subscribe(discovery_topic)
+    discovery_config()
     # 定时执行获取设备信息
     timer = threading.Timer(10, auto_publish)
     timer.start()
@@ -109,6 +115,11 @@ def on_connect(client, userdata, flags, rc):
 def on_message(client, userdata, msg):
     payload = str(msg.payload.decode('utf-8'))
     print("主题:" + msg.topic + " 消息:" + payload)
+    # 自动发现配置
+    if msg.topic == discovery_topic:
+        discovery_config()
+        return
+    # 发送红外命令
     arr = msg.topic.split('/')
     mac = arr[len(arr)-1]
     arr = payload.split('_', 1)
