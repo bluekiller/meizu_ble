@@ -23,7 +23,6 @@ class MZBtIr(object):
         self._temperature = None
         self._humidity = None
         self._battery = None
-        self._voltage = None
         self._receive_handle = None
         self._receive_buffer = None
         self._received_packet = 0
@@ -46,14 +45,27 @@ class MZBtIr(object):
         return self._humidity
 
     def battery(self):
-        if self._battery == None or self._battery < 0:
-            return 0
-        return self._battery
+        v = self.voltage()
+        if v > 3:
+            return 100
+        elif v > 2.98:
+            return 80
+        elif v > 2.95:
+            return 60
+        elif v > 2.9:
+            return 40
+        elif v > 2.78:
+            return 20
+        elif v > 2.3:
+            return 10
+        elif v > 2:
+            return 1
+        return 0
 
     def voltage(self):
-        if self._voltage == None:
+        if self._battery == None:
             return 0
-        return self._voltage
+        return self._battery
 
     def update(self, force_update=False):
         if force_update or (self._last_update is None) or (datetime.now() - self._min_update_inteval > self._last_update):
@@ -75,11 +87,8 @@ class MZBtIr(object):
                             if p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10', True):
                                 data = ch.read()
                                 battery10 = data[4]
-                                self._voltage = float(battery10) / 10.0
-                                # 根据运行电压2.3V - 3.6V区间计算
-                                self._battery = int((self._voltage - 2.3) / 1.3 * 100)
+                                self._battery = float(battery10) / 10.0
                         break
-                p.disconnect()
             except Exception as ex:
                 print("Unexpected error: {}".format(ex))
             finally:
@@ -125,7 +134,6 @@ class MZBtIr(object):
                             if error == False:
                                 sent = True
                     break
-            p.disconnect()
         except Exception as ex:
             print("Unexpected error: {}".format(ex))
         finally:
