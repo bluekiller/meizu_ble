@@ -75,9 +75,7 @@ class MeizuRemote(RemoteEntity):
         dev = command_list.get(device, {})
         # 判断配置是否存在
         if key in dev:
-            ir = dev[key].strip()
-            arr = ir.split(':')
-            self.ble.sendIr(arr[0], arr[1])
+            self.ble.sendIrRaw(dev[key])
 
     async def async_learn_command(self, **kwargs):
         command = kwargs.get('command', '')

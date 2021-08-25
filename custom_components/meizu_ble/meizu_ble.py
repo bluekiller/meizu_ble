@@ -119,6 +119,14 @@ def on_message(client, userdata, msg):
         if device in config_ir:
             if command in config_ir[device]:
                 print('发送红外命令')
+                try:
+                    ir_command = config_ir[device][command]
+                    ble = MZBtIr(mac)
+                    ble.sendIrRaw(ir_command)
+                    print('红外命令发送成功')
+                except Exception as ex:
+                    print(f"{mac}：出现异常")
+                    print(ex)
 
 def on_subscribe(client, userdata, mid, granted_qos):
     print("On Subscribed: qos = %d" % granted_qos)
