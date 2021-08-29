@@ -24,7 +24,6 @@
 1. 然后执行`python3 irdatareader.py -f btsnoop_hci.log`（缺啥依赖，自行安装）
 1. 如果没啥毛病，就会显示红外码了
 
-
 ## 配置
 
 ```yaml
@@ -41,7 +40,6 @@ sensor:
     mac: '68:3E:34:CC:E0:67'
     scan_interval: 30
 
-
 # 遥控器（请大家多多贡献自己录的码）
 remote:
   - platform: meizu_ble
@@ -54,6 +52,9 @@ remote:
 下面是大家贡献的设备与命令，通过调用 `remote.send_command` 服务传入设备与命令即可
 
 ```yaml
+创维电视:
+  power: 开关机
+  down: 下一频道
 海信HZ65U7E:
   power: 开关机
   up: 上
