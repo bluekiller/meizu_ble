@@ -22,7 +22,7 @@
 1. 将原项目clone到本地
 1. 将 `btsnoop_hci.log` 拷贝到电脑上原项目里的`meizu_ir_reader_from_android`文件夹之中
 1. 然后执行`python3 irdatareader.py -f btsnoop_hci.log`（缺啥依赖，自行安装）
-1. 如果没啥毛病，就会显示红外码了
+1. 如果没啥毛病，就会显示红外码了（貌似怎么样都只会有一个码，不知道为啥）
 
 ## 配置
 
