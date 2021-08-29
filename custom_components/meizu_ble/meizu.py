@@ -46,19 +46,10 @@ class MZBtIr(object):
 
     def battery(self):
         v = self.voltage()
-        if v > 3:
-            return 100
-        elif v > 2.98:
-            return 80
-        elif v > 2.95:
-            return 60
-        elif v > 2.9:
-            return 40
-        elif v > 2.78:
-            return 20
-        elif v > 2:
-            return 1
-        return 0
+        b = int((v - 2.3) / 1.3 * 100)
+        if b < 0:
+            b = 0
+        return b
 
     def voltage(self):
         if self._battery == None:
