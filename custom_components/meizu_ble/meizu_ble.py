@@ -15,7 +15,7 @@ HOST = config_mqtt['host']
 PORT = int(config_mqtt['port'])
 USERNAME = config_mqtt['user']
 PASSWORD = config_mqtt['password']
-SCAN_INTERVAL = 40
+SCAN_INTERVAL = 60
 # 自动发现
 discovery_topic = "ha-mqtt/discovery"
 # 读取红外码
@@ -48,10 +48,13 @@ def auto_publish():
             humidity = ble.humidity()
             voltage = ble.voltage()
             battery = ble.battery()
-            # 如果电量大于0，则推送，否则会有异常信息
-            if battery > 0:
+            # 为 0 则不上报，防止异常数据
+            if temperature != 0:
                 client.publish(f"meizu_ble/{mac}/temperature", payload=temperature, qos=0)
+            if humidity != 0:
                 client.publish(f"meizu_ble/{mac}/humidity", payload=humidity, qos=0)
+            # 如果电量大于0，则推送，否则会有异常信息
+            if battery > 0:                
                 client.publish(f"meizu_ble/{mac}/battery", payload=battery, qos=0)
                 attrs = {
                     'voltage': voltage,
