@@ -71,11 +71,25 @@ class MeizuRemote(RemoteEntity):
             return
         key = command[0]
         # 读取配置文件
-        command_list = load_yaml(self.config_file)
-        dev = command_list.get(device, {})
-        # 判断配置是否存在
-        if key in dev:
-            self.ble.sendIrRaw(dev[key])
+        command_list = load_yaml(self.config_file)        
+        if device != '':
+            dev = command_list.get(device, {})
+            # 判断配置是否存在
+            if key in dev:
+                ir_command = dev[key]
+            else:
+                ir_command = key
+            self.ble.sendIrRaw(ir_command)
+            return
 
     async def async_learn_command(self, **kwargs):
-        command = kwargs.get('command', '')
+        print('未测试通过')
+        # try:
+        #     data = self.ble.receiveIr()
+        #     bb = bytes(data)
+        #     self.hass.components.persistent_notification.async_create(f'''
+        #         收到的红外码是：{bb.hex()}
+        #         建议共享到公共库：https://github.com/shaonianzhentan/meizu_ble/issues/1
+        #     ''', title="魅族智能遥控器")
+        # except Exception as ex:
+        #     self.hass.components.persistent_notification.async_create(f"录码失败，请隔近一点再试试", title="魅族智能遥控器")
