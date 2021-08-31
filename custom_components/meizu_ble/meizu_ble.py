@@ -17,7 +17,7 @@ USERNAME = config_mqtt['user']
 PASSWORD = config_mqtt['password']
 SCAN_INTERVAL = 60
 # 自动发现
-discovery_topic = "ha-mqtt/discovery"
+discovery_topic = "homeassistant/status"
 # 读取红外码
 config_ir = load_yaml('ir.yaml')
 
@@ -128,7 +128,7 @@ def on_message(client, userdata, msg):
     payload = str(msg.payload.decode('utf-8'))
     print("主题:" + msg.topic + " 消息:" + payload)
     # 自动发现配置
-    if msg.topic == discovery_topic:
+    if msg.topic == discovery_topic and payload == 'online':
         discovery_config()
         return
     # 发送红外命令

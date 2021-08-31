@@ -100,6 +100,7 @@ class MeizuBLESensor(SensorEntity):
         self._state = None
         self._unit_of_measurement = SENSOR_TYPES[sensor_type][1]
         self._attr_device_class = SENSOR_TYPES[sensor_type][2]
+        self._attributes = {}
 
     @property
     def unique_id(self):
@@ -120,6 +121,10 @@ class MeizuBLESensor(SensorEntity):
         """Return the unit of measurement of this entity, if any."""
         return self._unit_of_measurement
 
+    @property
+    def extra_state_attributes(self):
+        return self._attributes
+
     def update(self):
         state = 0
         # 显示数据
@@ -129,6 +134,7 @@ class MeizuBLESensor(SensorEntity):
             state = self.client.humidity()
         elif self.type == SENSOR_BATTERY:
             state = self.client.battery()
+            self._attributes.update({ 'voltage': self.client.voltage(), 'mac': self.client._mac })
         # 数据大于0，则更新
         if state > 0:
             self._state = state
