@@ -38,7 +38,7 @@ sensor:
   - platform: meizu_ble
     name: 魅族智能遥控器
     mac: '68:3E:34:CC:E0:67'
-    scan_interval: 30
+    scan_interval: 60
 
 # 遥控器（请大家多多贡献自己录的码）
 remote:

@@ -22,7 +22,7 @@ _LOGGER = logging.getLogger(__name__)
 
 DEFAULT_NAME = "魅族智能遥控器"
 
-SCAN_INTERVAL = timedelta(seconds=30)
+SCAN_INTERVAL = timedelta(seconds=60)
 
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_HUMIDITY = "humidity"
