@@ -8,8 +8,8 @@
 
 ---
 
-- [蓝牙抓包，红外码解析 点这里](./meizu_ir_reader_from_android/README.md)
-- [遥控红外码，支持部分内置设备 点这里](./remote/README.md)
+- [蓝牙抓包，红外码解析 点这里](./meizu_ir_reader_from_android/)
+- [遥控红外码，支持部分内置设备 点这里](./remote/)
 
 ## 配置
 
