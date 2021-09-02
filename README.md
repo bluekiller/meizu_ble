@@ -69,7 +69,11 @@ remote:
   volumeup: 音量增加
   mute: 静音
   sleep: 休眠
+松下吸顶灯HKC9603:
+  poweroff: 关
+  poweron: 适悦按键
 ```
+
 
 > 分组
 
