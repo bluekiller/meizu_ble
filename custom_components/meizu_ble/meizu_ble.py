@@ -15,7 +15,7 @@ HOST = config_mqtt['host']
 PORT = int(config_mqtt['port'])
 USERNAME = config_mqtt['user']
 PASSWORD = config_mqtt['password']
-SCAN_INTERVAL = 60
+SCAN_INTERVAL = config.get('scan_interval', 60)
 # 自动发现
 discovery_topic = "homeassistant/status"
 # 读取红外码
