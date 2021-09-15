@@ -25,6 +25,17 @@
 松下吸顶灯HKC9603:
   poweroff: 关
   poweron: 适悦按键
+乐视超3X50:
+  power: 开关
+  menu: 菜单
+  back: 返回
+  volumeup: 音量+
+  volumedown: 音量-
+  up: 上
+  down: 下
+  left: 左
+  right: 右
+  back: 返回
 ```
 
 ### 松下吸顶灯HKC9603
