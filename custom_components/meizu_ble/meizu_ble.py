@@ -148,10 +148,11 @@ def on_message(client, userdata, msg):
                     ble = MZBtIr(mac)
                     ble.sendIrRaw(ir_command)
                     print('红外命令发送成功')
-                    client.publish(f"meizu_ble/{mac}/irdata", payload='', qos=0)
                 except Exception as ex:
                     print(f"{mac}：出现异常")
                     print(ex)
+                # 重置数据
+                client.publish(f"meizu_ble/{mac}/irdata", payload='', qos=0)
 
 def on_subscribe(client, userdata, mid, granted_qos):
     print("On Subscribed: qos = %d" % granted_qos)
