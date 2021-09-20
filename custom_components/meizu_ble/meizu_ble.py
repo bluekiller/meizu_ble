@@ -88,14 +88,15 @@ def discovery_config():
         # 自动配置红外遥控
         auto_config("select", {
             "unique_id": select_unique_id,
-            "name": f"{name}红外遥控",            
+            "name": f"{name}红外遥控",
+            "state_topic": f"meizu_ble/{mac}/irdata",
             "command_topic": command_topic,
             "options": options
         }, mac)
         # 自动配置温湿度传感器
         auto_config("sensor", {
             "unique_id": md5(f"{mac}温度"),
-            "name": f"{name}温度",            
+            "name": f"{name}温度",
             "state_topic": f"meizu_ble/{mac}/temperature",
             "unit_of_measurement": "°C",
             "device_class": "temperature",
@@ -147,6 +148,7 @@ def on_message(client, userdata, msg):
                     ble = MZBtIr(mac)
                     ble.sendIrRaw(ir_command)
                     print('红外命令发送成功')
+                    client.publish(f"meizu_ble/{mac}/irdata", payload='', qos=0)
                 except Exception as ex:
                     print(f"{mac}：出现异常")
                     print(ex)
