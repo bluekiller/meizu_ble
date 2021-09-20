@@ -129,19 +129,17 @@ def on_connect(client, userdata, flags, rc):
 ir_counter = 0
 def send_irdata(mac, ir_command):
     global ir_counter
-    try:
-        ble = MZBtIr(mac)
-        ble.sendIrRaw(ir_command)
+    ble = MZBtIr(mac)
+    result = ble.sendIrRaw(ir_command)
+    if result:
         print('红外命令发送成功')
         ir_counter = 0
-    except Exception as ex:
+    else:
         print(f"{mac}：出现异常，正在重试: {ir_counter}")
-        print(ex)
         # 出现异常，进行重试
         if ir_counter < 2:
             ir_counter = ir_counter + 1
             send_irdata(mac, ir_command)
-
 
 def on_message(client, userdata, msg):
     payload = str(msg.payload.decode('utf-8'))

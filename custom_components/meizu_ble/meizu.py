@@ -88,7 +88,7 @@ class MZBtIr(object):
     def sendIrRaw(self, data):
         ir = data.strip()
         arr = ir.split(':', 1)
-        self.sendIr(arr[0], arr[1])
+        return self.sendIr(arr[0], arr[1])
     
     def sendIr(self, key, ir_data):
         self._lock.acquire()
