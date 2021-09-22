@@ -72,7 +72,7 @@ def auto_publish():
 
 # 自动发现配置
 def discovery_config():
-    options = []
+    options = ['初始化']
     for key in config_ir:
         for ir_key in config_ir[key]:
             options.append(f"{key}_{ir_key}")
@@ -162,7 +162,7 @@ def on_message(client, userdata, msg):
                 ir_command = config_ir[device][command]
                 send_irdata(mac, ir_command)
                 # 重置数据
-                client.publish(f"meizu_ble/{mac}/irdata", payload='', qos=0)
+                client.publish(f"meizu_ble/{mac}/irdata", payload='初始化', qos=0)
 
 def on_subscribe(client, userdata, mid, granted_qos):
     print("On Subscribed: qos = %d" % granted_qos)
