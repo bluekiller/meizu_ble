@@ -138,6 +138,7 @@ def send_irdata(mac, ir_command):
         print(f"{mac}：出现异常，正在重试: {ir_counter}")
         # 出现异常，进行重试
         if ir_counter < 2:
+            time.sleep(0.1)
             ir_counter = ir_counter + 1
             send_irdata(mac, ir_command)
 
