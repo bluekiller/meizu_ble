@@ -28,11 +28,11 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-def setup_platform(hass, config, add_entities, discovery_info=None):
-
+async def async_setup_entry(hass, entry, async_add_entities):
+    config = entity.data
     name = config.get(CONF_NAME)
     mac = config.get(CONF_MAC)
-    add_entities([MeizuRemote(mac, name, hass)])
+    async_add_entities([MeizuRemote(mac, name, hass)], True)
 
 class MeizuRemote(RemoteEntity):
 

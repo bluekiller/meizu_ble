@@ -4,7 +4,7 @@ import logging
 import voluptuous as vol
 
 from homeassistant.helpers.event import track_time_interval
-from homeassistant.components.sensor import PLATFORM_SCHEMA, SensorEntity
+from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import (
     CONF_NAME,
     CONF_MAC,
@@ -42,9 +42,8 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
     }
 )
 
-
-def setup_platform(hass, config, add_entities, discovery_info=None):
-    
+async def async_setup_entry(hass, entry, async_add_entities):
+    config = entity.data
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
     mac = config.get(CONF_MAC)
@@ -78,9 +77,9 @@ def setup_platform(hass, config, add_entities, discovery_info=None):
             ble.update()
 
     track_time_interval(hass, interval, config.get(CONF_SCAN_INTERVAL))
-    # 添加实体
-    add_entities(dev, True)
-    
+
+    async_add_entities(dev, True)
+
 class MeizuBLESensor(SensorEntity):
     """Implementation of the DHT sensor."""
 

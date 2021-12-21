@@ -1,0 +1,16 @@
+{
+    "config": {
+        "step": {
+            "user": {
+                "title": "魅族智能遥控器",
+                "description": "项目: https://github.com/shaonianzhentan/meizu_ble",
+                "data": {
+                    "name": "设备名称",
+                    "mac": "蓝牙MAC地址（68:3E:34:CC:E0:67）",
+                    "scan_interval": "扫描时间"
+                }
+            }
+        },
+        "error": {}
+    }
+}
