@@ -5,6 +5,7 @@ from datetime import timedelta
 from homeassistant.util.dt import utcnow
 from .shaonianzhentan import save_yaml, load_yaml
 from .meizu import MZBtIr
+from .const import DOMAIN, VERSION
 
 from homeassistant.components.remote import (
     PLATFORM_SCHEMA,
@@ -43,6 +44,21 @@ class MeizuRemote(RemoteEntity):
     @property
     def unique_id(self):
         return self._mac
+
+    @property
+    def device_info(self):
+        mac = self._mac
+        return {
+            "configuration_url": "https://github.com/shaonianzhentan/meizu_ble",
+            "identifiers": {
+                (DOMAIN, mac)
+            },
+            "name": self._name,
+            "manufacturer": "Meizu",
+            "model": mac,
+            "sw_version": VERSION,
+            "via_device": (DOMAIN, mac),
+        }
 
     @property
     def is_on(self):

@@ -17,6 +17,7 @@ from homeassistant.const import (
 import homeassistant.helpers.config_validation as cv
 
 from .meizu import MZBtIr
+from .const import DOMAIN, VERSION
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -92,6 +93,21 @@ class MeizuBLESensor(SensorEntity):
     @property
     def unique_id(self):
         return f"{self.client._mac}{self.type}"
+
+    @property
+    def device_info(self):
+        mac = self.client._mac
+        return {
+            "configuration_url": "https://github.com/shaonianzhentan/meizu_ble",
+            "identifiers": {
+                (DOMAIN, mac)
+            },
+            "name": self.client_name,
+            "manufacturer": "Meizu",
+            "model": mac,
+            "sw_version": VERSION,
+            "via_device": (DOMAIN, mac),
+        }
 
     @property
     def name(self):
