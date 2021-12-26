@@ -20,10 +20,6 @@ from .meizu import MZBtIr
 
 _LOGGER = logging.getLogger(__name__)
 
-DEFAULT_NAME = "魅族智能遥控器"
-
-SCAN_INTERVAL = timedelta(seconds=300)
-
 SENSOR_TEMPERATURE = "temperature"
 SENSOR_HUMIDITY = "humidity"
 SENSOR_BATTERY = "battery"
@@ -68,7 +64,7 @@ async def async_setup_entry(hass, entry, async_add_entities):
         for ble in dev:
             ble.update()
 
-    track_time_interval(hass, interval, config.get(CONF_SCAN_INTERVAL))
+    track_time_interval(hass, interval, timedelta(seconds=config.get(CONF_SCAN_INTERVAL)))
 
     async_add_entities(dev, True)
 
