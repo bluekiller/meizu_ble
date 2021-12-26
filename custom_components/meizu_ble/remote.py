@@ -29,7 +29,7 @@ PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
 )
 
 async def async_setup_entry(hass, entry, async_add_entities):
-    config = entity.data
+    config = entry.data
     name = config.get(CONF_NAME)
     mac = config.get(CONF_MAC)
     async_add_entities([MeizuRemote(mac, name, hass)], True)

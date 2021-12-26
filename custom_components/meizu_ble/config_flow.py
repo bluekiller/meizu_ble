@@ -24,5 +24,5 @@ class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
 
         if user_input is None:
             return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
-
+        user_input['mac'] = user_input['mac'].upper()
         return self.async_create_entry(title=user_input['name'], data=user_input)
