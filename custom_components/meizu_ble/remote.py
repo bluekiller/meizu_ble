@@ -21,13 +21,6 @@ DEFAULT_NAME = "魅族智能遥控器"
 
 _LOGGER = logging.getLogger(__name__)
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_MAC): cv.string,
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-    }
-)
-
 async def async_setup_entry(hass, entry, async_add_entities):
     config = entry.data
     name = config.get(CONF_NAME)

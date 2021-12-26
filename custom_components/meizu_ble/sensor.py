@@ -34,16 +34,8 @@ SENSOR_TYPES = {
     SENSOR_BATTERY: ["电量", PERCENTAGE, DEVICE_CLASS_BATTERY],    
 }
 
-PLATFORM_SCHEMA = PLATFORM_SCHEMA.extend(
-    {
-        vol.Required(CONF_MAC): cv.string,
-        vol.Optional(CONF_NAME, default=DEFAULT_NAME): cv.string,
-        vol.Optional(CONF_SCAN_INTERVAL, default=SCAN_INTERVAL): cv.time_period,
-    }
-)
-
 async def async_setup_entry(hass, entry, async_add_entities):
-    config = entity.data
+    config = entry.data
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
     mac = config.get(CONF_MAC)

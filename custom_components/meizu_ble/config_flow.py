@@ -2,6 +2,7 @@ from __future__ import annotations
 
 from typing import Any
 import voluptuous as vol
+import homeassistant.helpers.config_validation as cv
 
 from homeassistant.config_entries import ConfigFlow
 from homeassistant.data_entry_flow import FlowResult
@@ -11,7 +12,7 @@ from .const import DOMAIN, DEFAULT_NAME, SCAN_INTERVAL
 DATA_SCHEMA = vol.Schema({
     vol.Required("name", default=DEFAULT_NAME): str,
     vol.Required("mac"): str,
-    vol.Required("scan_interval", default=SCAN_INTERVAL): int
+    vol.Required("scan_interval", default=SCAN_INTERVAL): cv.time_period
 })
 
 class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
