@@ -64,12 +64,8 @@ async def async_setup_entry(hass, entry, async_add_entities):
     # 定时更新
     async def update_interval(now):
         client.update()
-        task = []
         for ble in dev:
-            task.append(ble.async_update())
-        loop = asyncio.get_event_loop()
-        loop.run_until_complete(asyncio.wait(task))
-        loop.close()
+            ble.update()
 
     async_track_time_interval(hass, update_interval, timedelta(seconds=config.get(CONF_SCAN_INTERVAL)))
 
@@ -132,7 +128,7 @@ class MeizuBLESensor(SensorEntity):
     def extra_state_attributes(self):
         return self._attributes
 
-    async def async_update(self):
+    def update(self):
         state = 0
         # 显示数据
         if self.type == SENSOR_TEMPERATURE:
