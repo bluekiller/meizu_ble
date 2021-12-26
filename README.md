@@ -24,24 +24,6 @@
 - [蓝牙抓包，红外码解析 点这里](./meizu_ir_reader_from_android/)
 - [遥控红外码，支持部分内置设备 点这里](./remote/)
 
-> 分组
-
-```yaml
-group:
-  meizu_ble_1:
-    name: 魅族智能遥控器
-    entities:
-      - sensor.mei_zu_zhi_neng_yao_kong_qi_wen_du
-      - sensor.mei_zu_zhi_neng_yao_kong_qi_shi_du
-      - sensor.mei_zu_zhi_neng_yao_kong_qi_dian_liang
-  meizu_ble_2:
-    name: 魅族智能遥控器
-    entities:
-      - sensor.mei_zu_zhi_neng_yao_kong_qi_wen_du
-      - sensor.mei_zu_zhi_neng_yao_kong_qi_shi_du
-      - sensor.mei_zu_zhi_neng_yao_kong_qi_dian_liang
-```
-
 ## 更新日志
 
 - 更新时间默认5分钟
