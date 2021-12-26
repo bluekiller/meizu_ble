@@ -1,9 +1,9 @@
 from datetime import timedelta
-import logging
+import logging, asyncio
 
 import voluptuous as vol
 
-from homeassistant.helpers.event import track_time_interval
+from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import (
     CONF_NAME,
@@ -59,15 +59,19 @@ async def async_setup_entry(hass, entry, async_add_entities):
                 )
     ]
 
-    # 定时更新
-    def interval(now):
-        client.update()
-        for ble in dev:
-            ble.update()
-
-    track_time_interval(hass, interval, timedelta(seconds=config.get(CONF_SCAN_INTERVAL)))
-
     async_add_entities(dev, True)
+
+    # 定时更新
+    async def update_interval(now):
+        client.update()
+        task = []
+        for ble in dev:
+            task.append(ble.async_update())
+        loop = asyncio.get_event_loop()
+        loop.run_until_complete(asyncio.wait(task))
+        loop.close()
+
+    async_track_time_interval(hass, update_interval, timedelta(seconds=config.get(CONF_SCAN_INTERVAL)))
 
 class MeizuBLESensor(SensorEntity):
     """Implementation of the DHT sensor."""
@@ -128,7 +132,7 @@ class MeizuBLESensor(SensorEntity):
     def extra_state_attributes(self):
         return self._attributes
 
-    def update(self):
+    async def async_update(self):
         state = 0
         # 显示数据
         if self.type == SENSOR_TEMPERATURE:
