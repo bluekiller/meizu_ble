@@ -1,9 +1,6 @@
+import logging
 from datetime import timedelta
-import logging, asyncio
 
-import voluptuous as vol
-
-from homeassistant.helpers.event import async_track_time_interval
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import (
     CONF_NAME,
@@ -14,10 +11,10 @@ from homeassistant.const import (
     DEVICE_CLASS_BATTERY,
     PERCENTAGE,
 )
-import homeassistant.helpers.config_validation as cv
+from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
-from .meizu import MZBtIr
 from .const import DOMAIN, VERSION
+from .meizu import MZBtIr
 
 _LOGGER = logging.getLogger(__name__)
 
@@ -28,8 +25,9 @@ SENSOR_BATTERY = "battery"
 SENSOR_TYPES = {
     SENSOR_TEMPERATURE: ["温度", None, DEVICE_CLASS_TEMPERATURE],
     SENSOR_HUMIDITY: ["湿度", PERCENTAGE, DEVICE_CLASS_HUMIDITY],
-    SENSOR_BATTERY: ["电量", PERCENTAGE, DEVICE_CLASS_BATTERY],    
+    SENSOR_BATTERY: ["电量", PERCENTAGE, DEVICE_CLASS_BATTERY],
 }
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     config = entry.data
@@ -38,48 +36,58 @@ async def async_setup_entry(hass, entry, async_add_entities):
     mac = config.get(CONF_MAC)
     client = MZBtIr(mac)
 
+    # 定时更新
+    async def update_interval():
+        _LOGGER.debug("updating sensors [%s]", mac)
+        client.update()
+
+    coordinator = DataUpdateCoordinator(hass, _LOGGER,
+                                        name=f'meizu_ble_mod[{mac}]',
+                                        update_interval=timedelta(seconds=config.get(CONF_SCAN_INTERVAL)),
+                                        update_method=update_interval)
+
     dev = [
         MeizuBLESensor(
-                    client,
-                    SENSOR_TEMPERATURE,
-                    SENSOR_TYPES[SENSOR_TEMPERATURE][1],
-                    name,
-                ),
+            client,
+            SENSOR_TEMPERATURE,
+            SENSOR_TYPES[SENSOR_TEMPERATURE][1],
+            name,
+            coordinator,
+        ),
         MeizuBLESensor(
-                    client,
-                    SENSOR_HUMIDITY,
-                    SENSOR_TYPES[SENSOR_HUMIDITY][1],
-                    name,
-                ),
+            client,
+            SENSOR_HUMIDITY,
+            SENSOR_TYPES[SENSOR_HUMIDITY][1],
+            name,
+            coordinator,
+        ),
         MeizuBLESensor(
-                    client,
-                    SENSOR_BATTERY,
-                    SENSOR_TYPES[SENSOR_BATTERY][1],
-                    name,
-                )
+            client,
+            SENSOR_BATTERY,
+            SENSOR_TYPES[SENSOR_BATTERY][1],
+            name,
+            coordinator,
+        )
     ]
 
-    async_add_entities(dev, True)
+    await coordinator.async_config_entry_first_refresh()
 
-    # 定时更新
-    async def update_interval(now):
-        client.update()
-        for ble in dev:
-            ble.update()
+    async_add_entities(dev)
 
-    async_track_time_interval(hass, update_interval, timedelta(seconds=config.get(CONF_SCAN_INTERVAL)))
 
-class MeizuBLESensor(SensorEntity):
+class MeizuBLESensor(CoordinatorEntity, SensorEntity):
     """Implementation of the DHT sensor."""
 
     def __init__(
-        self,
-        client,
-        sensor_type,
-        temp_unit,
-        name,
+            self,
+            client,
+            sensor_type,
+            temp_unit,
+            name,
+            coordinator
     ):
         """Initialize the sensor."""
+        CoordinatorEntity.__init__(self, coordinator)
         self.client_name = name
         self._name = SENSOR_TYPES[sensor_type][0]
         self.client = client
@@ -98,7 +106,7 @@ class MeizuBLESensor(SensorEntity):
     def device_info(self):
         mac = self.client._mac
         return {
-            "configuration_url": "https://github.com/shaonianzhentan/meizu_ble",
+            "configuration_url": "https://github.com/bluekiller/meizu_ble",
             "identifiers": {
                 (DOMAIN, mac)
             },
@@ -117,6 +125,17 @@ class MeizuBLESensor(SensorEntity):
     @property
     def state(self):
         """Return the state of the sensor."""
+        state = 0
+        # 显示数据
+        if self.type == SENSOR_TEMPERATURE:
+            state = self.client.temperature()
+        elif self.type == SENSOR_HUMIDITY:
+            state = self.client.humidity()
+        elif self.type == SENSOR_BATTERY:
+            state = self.client.battery()
+        # 数据大于0，则更新
+        if state > 0:
+            self._state = state
         return self._state
 
     @property
@@ -126,18 +145,6 @@ class MeizuBLESensor(SensorEntity):
 
     @property
     def extra_state_attributes(self):
+        if self.type == SENSOR_BATTERY:
+            self._attributes.update({'voltage': self.client.voltage(), 'mac': self.client._mac})
         return self._attributes
-
-    def update(self):
-        state = 0
-        # 显示数据
-        if self.type == SENSOR_TEMPERATURE:
-            state = self.client.temperature()
-        elif self.type == SENSOR_HUMIDITY:
-            state = self.client.humidity()
-        elif self.type == SENSOR_BATTERY:
-            state = self.client.battery()
-            self._attributes.update({ 'voltage': self.client.voltage(), 'mac': self.client._mac })
-        # 数据大于0，则更新
-        if state > 0:
-            self._state = state
