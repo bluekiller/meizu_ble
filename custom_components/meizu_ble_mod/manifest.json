@@ -1,14 +1,14 @@
 {
-    "domain": "meizu_ble",
+    "domain": "meizu_ble_mod",
     "name": "\u9B45\u65CF\u667A\u80FD\u9065\u63A7\u5668",
     "version": "1.0",
     "config_flow": true,
-    "documentation": "https://github.com/shaonianzhentan/meizu_ble",
+    "documentation": "https://github.com/bluekiller/meizu_ble",
     "requirements": [
         "bluepy==1.3.0"
     ],
     "dependencies": [],
     "codeowners": [
-        "@shaonianzhentan"
+        "@bluekiller"
     ]
 }
