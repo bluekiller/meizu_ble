@@ -18,8 +18,6 @@ class MZBtIr(object):
         self._mac = mac
         self._lock = Lock()
         self._sequence = 0
-        self._last_update = None
-        self._last_update_battery = None
         self._temperature = None
         self._humidity = None
         self._battery = None
@@ -79,7 +77,6 @@ class MZBtIr(object):
                                 data = ch.read()
                                 battery10 = data[4]
                                 self._battery = float(battery10) / 10.0
-                                self._last_update_battery = datetime.now()
                     break
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {}", ex)

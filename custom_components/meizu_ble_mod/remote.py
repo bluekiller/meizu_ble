@@ -1,32 +1,25 @@
-import time, asyncio
 import logging
-import voluptuous as vol
-from datetime import timedelta
-from homeassistant.util.dt import utcnow
-from .shaonianzhentan import save_yaml, load_yaml
-from .meizu import MZBtIr
-from .const import DOMAIN, VERSION
 
 from homeassistant.components.remote import (
-    PLATFORM_SCHEMA,
-    ATTR_DELAY_SECS,
-    ATTR_NUM_REPEATS,
-    DEFAULT_DELAY_SECS,
     RemoteEntity,
 )
-
 from homeassistant.const import CONF_NAME, CONF_MAC
-import homeassistant.helpers.config_validation as cv
+
+from .const import DOMAIN, VERSION
+from .meizu import MZBtIr
+from .shaonianzhentan import load_yaml
 
 DEFAULT_NAME = "魅族智能遥控器"
 
 _LOGGER = logging.getLogger(__name__)
+
 
 async def async_setup_entry(hass, entry, async_add_entities):
     config = entry.data
     name = config.get(CONF_NAME)
     mac = config.get(CONF_MAC)
     async_add_entities([MeizuRemote(mac, name, hass)], True)
+
 
 class MeizuRemote(RemoteEntity):
 
@@ -69,18 +62,18 @@ class MeizuRemote(RemoteEntity):
         return False
 
     async def async_turn_on(self, activity: str = None, **kwargs):
-         """Turn the remote on."""
+        """Turn the remote on."""
 
     async def async_turn_off(self, activity: str = None, **kwargs):
-         """Turn the remote off."""
-         
+        """Turn the remote off."""
+
     async def async_send_command(self, command, **kwargs):
         device = kwargs.get('device', '')
         if device == '':
             return
         key = command[0]
         # 读取配置文件
-        command_list = load_yaml(self.config_file)        
+        command_list = load_yaml(self.config_file)
         if device != '':
             dev = command_list.get(device, {})
             # 判断配置是否存在
