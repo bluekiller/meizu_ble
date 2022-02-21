@@ -135,11 +135,11 @@ class MeizuBLESensor(CoordinatorEntity, SensorEntity):
     def native_value(self):
         """Return the state of the sensor."""
         if self._type == SENSOR_TEMPERATURE:
-            _state = self._client.temperature()
+            self._state = self._client.temperature()
         elif self._type == SENSOR_HUMIDITY:
-            _state = self._client.humidity()
+            self._state = self._client.humidity()
         elif self._type == SENSOR_BATTERY:
-            _state = self._client.battery()
+            self._state = self._client.battery()
 
         return self._state
 
