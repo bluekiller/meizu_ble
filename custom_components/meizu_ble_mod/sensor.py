@@ -75,7 +75,7 @@ class SensorCoordinator(DataUpdateCoordinator):
         self._client = client
         self._seq = 0
 
-    def _async_update_data(self):
+    async def _async_update_data(self):
         _LOGGER.debug("updating sensors [%s]", self._client.mac())
         self._client.update(self._seq == 0)
         if self._seq == 10:
