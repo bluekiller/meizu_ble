@@ -49,7 +49,7 @@ class MeizuRemote(RemoteEntity):
     def device_info(self):
         mac = self._mac
         return {
-            "configuration_url": "https://github.com/shaonianzhentan/meizu_ble",
+            "configuration_url": "https://github.com/bluekiller/meizu_ble_mod",
             "identifiers": {
                 (DOMAIN, mac)
             },

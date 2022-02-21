@@ -106,7 +106,7 @@ class MeizuBLESensor(CoordinatorEntity, SensorEntity):
     def device_info(self):
         mac = self.client._mac
         return {
-            "configuration_url": "https://github.com/bluekiller/meizu_ble",
+            "configuration_url": "https://github.com/bluekiller/meizu_ble_mod",
             "identifiers": {
                 (DOMAIN, mac)
             },
