@@ -130,7 +130,7 @@ ir_counter = 0
 def send_irdata(mac, ir_command):
     global ir_counter
     ble = MZBtIr(mac)
-    result = ble.sendIrRaw(ir_command)
+    result = ble.send_ir_raw(ir_command)
     if result:
         print('红外命令发送成功')
         ir_counter = 0

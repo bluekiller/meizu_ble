@@ -14,14 +14,13 @@ DATA_SCHEMA = vol.Schema({
     vol.Required("scan_interval", default=SCAN_INTERVAL): int
 })
 
-class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
 
+class SimpleConfigFlow(ConfigFlow, domain=DOMAIN):
     VERSION = 1
 
     async def async_step_user(
-        self, user_input: dict[str, Any] | None = None
+            self, user_input: dict[str, Any] | None = None
     ) -> FlowResult:
-
         if user_input is None:
             return self.async_show_form(step_id="user", data_schema=DATA_SCHEMA)
         user_input['mac'] = user_input['mac'].upper()

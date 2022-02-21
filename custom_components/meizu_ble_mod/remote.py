@@ -88,7 +88,7 @@ class MeizuRemote(RemoteEntity):
                 ir_command = dev[key]
             else:
                 ir_command = key
-            self.ble.sendIrRaw(ir_command)
+            self.ble.send_ir_raw(ir_command)
             return
 
     async def async_learn_command(self, **kwargs):
