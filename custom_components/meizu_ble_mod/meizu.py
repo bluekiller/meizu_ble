@@ -3,7 +3,8 @@ from binascii import a2b_hex
 from datetime import datetime
 from threading import Lock
 
-from bluepy.btle import Peripheral
+import asyncio
+from bleak import BleakClient
 
 SERVICE_UUID = "000016f2-0000-1000-8000-00805f9b34fb"
 _LOGGER = logging.getLogger(__name__)
@@ -54,131 +55,100 @@ class MZBtIr(object):
     def voltage(self):
         return self._battery
 
-    def update(self, update_battery=True):
+    async def update(self, update_battery=True):
         self._lock.acquire()
-        p = None
         try:
-            p = Peripheral(self._mac, "public")
-            ch_list = p.getCharacteristics()
-            for ch in ch_list:
-                if str(ch.uuid) == SERVICE_UUID:
-                    if p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11',
-                                             True):
-                        data = ch.read()
-                        humihex = data[6:8]
-                        temphex = data[4:6]
-                        temp10 = int.from_bytes(temphex, byteorder='little')
-                        humi10 = int.from_bytes(humihex, byteorder='little')
-                        self._temperature = float(temp10) / 100.0
-                        self._humidity = float(humi10) / 100.0
-                        if update_battery:
-                            if p.writeCharacteristic(ch.getHandle(),
-                                                     b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10', True):
-                                data = ch.read()
-                                battery10 = data[4]
-                                self._battery = float(battery10) / 10.0
-                    break
+            async with BleakClient(self._mac) as client:
+                await client.write_gatt_char(SERVICE_UUID, b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
+                data = await client.read_gatt_char(SERVICE_UUID)
+                humihex = data[6:8]
+                temphex = data[4:6]
+                temp10 = int.from_bytes(temphex, byteorder='little')
+                humi10 = int.from_bytes(humihex, byteorder='little')
+                self._temperature = float(temp10) / 100.0
+                self._humidity = float(humi10) / 100.0
+                if update_battery:
+                    await client.write_gatt_char(SERVICE_UUID, b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10', True)
+                    data = await client.read_gatt_char(SERVICE_UUID)
+                    battery10 = data[4]
+                    self._battery = float(battery10) / 10.0
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {}", ex)
         finally:
-            if p is not None:
-                p.disconnect()
             self._lock.release()
 
-    def send_ir_raw(self, data):
+    async def send_ir_raw(self, data):
         ir = data.strip()
         arr = ir.split(':', 1)
-        return self.send_ir(arr[0], arr[1])
+        return await self.send_ir(arr[0], arr[1])
 
-    def send_ir(self, key, ir_data):
+    async def send_ir(self, key, ir_data):
         self._lock.acquire()
         sent = False
-        p = None
         try:
-            p = Peripheral(self._mac, "public")
-            ch_list = p.getCharacteristics()
-            for ch in ch_list:
-                if str(ch.uuid) == SERVICE_UUID:
-                    sequence = self.get_sequence()
-                    if p.writeCharacteristic(ch.getHandle(),
-                                             b'\x55' + bytes([len(a2b_hex(key)) + 3, sequence]) + b'\x03' + a2b_hex(
-                                                 key), True):
-                        data = ch.read()
-                        if len(data) == 5 and data[4] == 1:
-                            sent = True
+            async with BleakClient(self._mac) as client:
+                await client.write_gatt_char(SERVICE_UUID, b'\x55' + bytes([len(a2b_hex(key)) + 3, sequence]) + b'\x03' + a2b_hex(key), True)
+                data = await client.read_gatt_char(SERVICE_UUID)
+                if len(data) == 5 and data[4] == 1:
+                    sent = True
+                else:
+                    send_list = []
+                    packet_count = int(len(ir_data) / 30) + 1
+                    if len(data) % 30 != 0:
+                        packet_count += 1
+                    send_list.append(b'\x55' + bytes([len(a2b_hex(key)) + 5, sequence]) + b'\x00' + bytes([0, packet_count]) + a2b_hex(key))
+                    i = 0
+                    while i < packet_count - 1:
+                        if len(ir_data) - i * 30 < 30:
+                            send_ir_data = ir_data[i * 30:]
                         else:
-                            send_list = []
-                            packet_count = int(len(ir_data) / 30) + 1
-                            if len(data) % 30 != 0:
-                                packet_count += 1
-                            send_list.append(b'\x55' + bytes([len(a2b_hex(key)) + 5, sequence]) + b'\x00' + bytes(
-                                [0, packet_count]) + a2b_hex(key))
-                            i = 0
-                            while i < packet_count - 1:
-                                if len(ir_data) - i * 30 < 30:
-                                    send_ir_data = ir_data[i * 30:]
-                                else:
-                                    send_ir_data = ir_data[i * 30:(i + 1) * 30]
-                                send_list.append(
-                                    b'\x55' + bytes([int(len(send_ir_data) / 2 + 4), sequence]) + b'\x00' + bytes(
-                                        [i + 1]) + a2b_hex(send_ir_data))
-                                i += 1
-                            error = False
-                            for j in range(len(send_list)):
-                                r = p.writeCharacteristic(ch.getHandle(), send_list[j], True)
-                                if not r:
-                                    error = True
-                                    break
-                            if not error:
-                                sent = True
-                    break
+                            send_ir_data = ir_data[i * 30:(i + 1) * 30]
+                        send_list.append(b'\x55' + bytes([int(len(send_ir_data) / 2 + 4), sequence]) + b'\x00' + bytes([i + 1]) + a2b_hex(send_ir_data))
+                        i += 1
+                    error = False
+                    for j in range(len(send_list)):
+                        r = client.write_gatt_char(SERVICE_UUID, send_list[j], True)
+                        if not r:
+                            error = True
+                            break
+                    if not error:
+                        sent = True
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {}", ex)
         finally:
-            if p is not None:
-                p.disconnect()
             self._lock.release()
         return sent
 
-    def receive_ir(self, timeout=15):
+    async def receive_ir(self, timeout=15):
         self._lock.acquire()
-        self._receive_handle = None
         self._receive_buffer = False
         self._received_packet = 0
         self._total_packet = -1
         try:
-            p = Peripheral(self._mac, "public")
-            chList = p.getCharacteristics()
-            for ch in chList:
-                if str(ch.uuid) == SERVICE_UUID:
-                    self._receive_handle = ch.getHandle()
-                    sequence = self.get_sequence()
-                    if p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([sequence]) + b'\x05', True):
-                        data = ch.read()
-                        if len(data) == 4 and data[3] == 7:
-                            p.withDelegate(self)
-                            while self._received_packet != self._total_packet:
-                                if not p.waitForNotifications(timeout):
-                                    self._receive_buffer = False
-                                    break
-                            p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([sequence]) + b'\x0b', True)
-                            p.writeCharacteristic(ch.getHandle(), b'\x55\x03' + bytes([sequence]) + b'\x06', True)
-                        else:
-                            self._receive_buffer = False
-                    break
-            self._receive_handle = None
-            p.disconnect()
+            async with BleakClient(self._mac) as client:
+                sequence = self.get_sequence()
+                await client.write_gatt_char(SERVICE_UUID, b'\x55\x03' + bytes([sequence]) + b'\x05', True)
+                data = await client.read_gatt_char(SERVICE_UUID)
+                if len(data) == 4 and data[3] == 7:
+                    await start_notify.start_notify(SERVICE_UUID, handle_notification)
+                    # todo
+                    # while self._received_packet != self._total_packet:
+                    #     if not p.waitForNotifications(timeout):
+                    #         self._receive_buffer = False
+                    #         break
+                    await client.write_gatt_char(SERVICE_UUID, b'\x55\x03' + bytes([sequence]) + b'\x0b', True)
+                    await client.write_gatt_char(SERVICE_UUID, b'\x55\x03' + bytes([sequence]) + b'\x06', True)
+                else:
+                    self._receive_buffer = False
         except Exception as ex:
             print("Unexpected error: {}".format(ex))
-            self._receive_handle = None
             self._receive_buffer = False
-            p.disconnect()
         finally:
             self._lock.release()
         return self._receive_buffer
 
-    def handle_notification(self, cHandle, data):
-        if cHandle == self._receive_handle:
+    def handle_notification(self, characteristic, data):
+        if characteristic.uuid == SERVICE_UUID:
             if len(data) > 4 and data[3] == 9:
                 if data[4] == 0:
                     self._total_packet = data[5]
@@ -190,3 +160,4 @@ class MZBtIr(object):
                 else:
                     self._receive_buffer = False
                     self._total_packet = -1
+                    
