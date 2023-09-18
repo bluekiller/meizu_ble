@@ -8,10 +8,10 @@ CONFIG_SCHEMA = cv.deprecated(DOMAIN)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.config_entries.async_setup_platforms(entry, PLATFORMS)
     hass.data[DOMAIN] = {}
+    await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
     return True
 
 
 async def async_unload_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    return await hass.config_entries.async_unload_platforms(entry, PLATFORMS)
+    return await hass.config_entries.async_forward_entry_setups(entry, PLATFORMS)
