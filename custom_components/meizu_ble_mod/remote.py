@@ -28,7 +28,7 @@ class MeizuRemote(RemoteEntity):
         self._mac = mac
         self._name = name
         self.config_file = hass.config.path("custom_components/meizu_ble_mod/ir.yaml")
-        self.ble = MZBtIr(mac)
+        self.ble = hass.data[DOMAIN].get(mac)
 
     @property
     def name(self):

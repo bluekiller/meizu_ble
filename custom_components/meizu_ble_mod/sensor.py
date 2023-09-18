@@ -2,6 +2,7 @@
 import logging
 from datetime import timedelta
 
+import homeassistant.components.bluetooth
 from homeassistant.components.sensor import SensorEntity
 from homeassistant.const import (
     CONF_NAME,
@@ -12,6 +13,7 @@ from homeassistant.const import (
     DEVICE_CLASS_BATTERY,
     PERCENTAGE,
 )
+from homeassistant.core import HomeAssistant
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
 from .const import DOMAIN, VERSION
@@ -30,14 +32,14 @@ SENSOR_TYPES = {
 }
 
 
-async def async_setup_entry(hass, entry, async_add_entities):
+async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
     """Setup meizu ble sensor entry"""
     config = entry.data
     SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
     name = config[CONF_NAME]
     mac = config.get(CONF_MAC)
-    client = MZBtIr(mac)
-
+    client = MZBtIr(homeassistant.components.bluetooth.async_ble_device_from_address(mac))
+    hass.data[DOMAIN][mac] = client
     coordinator = SensorCoordinator(hass, client, config)
 
     dev = [
@@ -64,6 +66,11 @@ async def async_setup_entry(hass, entry, async_add_entities):
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(dev)
+
+async def async_unload_entry(hass, entry):
+    client = hass.data[DOMAIN].get(entry.data.get(CONF_MAC))
+    if client:
+        await client.close()
 
 
 class SensorCoordinator(DataUpdateCoordinator):

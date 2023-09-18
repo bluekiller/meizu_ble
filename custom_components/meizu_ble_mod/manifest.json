@@ -5,9 +5,8 @@
     "config_flow": true,
     "documentation": "https://github.com/bluekiller/meizu_ble_mod",
     "requirements": [
-        "bluepy==1.3.0"
     ],
-    "dependencies": [],
+    "dependencies": ["bluetooth_adapters"],
     "codeowners": [
         "@bluekiller"
     ]
