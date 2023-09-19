@@ -92,7 +92,7 @@ class MZBtIr(object):
             await self._client.start_notify(SERVICE_UUID, self._sensors_update_callback)
             await self._client.write_gatt_char(SERVICE_UUID,
                                                b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
-            await asyncio.sleep(0.5)
+            await asyncio.sleep(0.2)
             await self._client.stop_notify(SERVICE_UUID)
 
             if update_battery:
@@ -100,7 +100,7 @@ class MZBtIr(object):
                 await self._client.write_gatt_char(SERVICE_UUID,
                                                    b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
                                                    True)
-                await asyncio.sleep(0.5)
+                await asyncio.sleep(0.2)
                 await self._client.stop_notify(SERVICE_UUID)
 
         except Exception as ex:
