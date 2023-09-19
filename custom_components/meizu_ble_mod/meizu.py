@@ -1,8 +1,9 @@
+import asyncio
 import logging
 from binascii import a2b_hex
 from threading import Lock
 
-from bleak import BleakClient, BLEDevice
+from bleak import BleakClient, BLEDevice, BleakGATTCharacteristic
 
 SERVICE_UUID = "000016f2-0000-1000-8000-00805f9b34fb"
 _LOGGER = logging.getLogger(__name__)
@@ -69,26 +70,39 @@ class MZBtIr(object):
     def voltage(self):
         return self._battery
 
+    def _sensors_update_callback(self, characteristic: BleakGATTCharacteristic, data: bytearray):
+        _LOGGER.debug("got sensor data: %s", data.hex())
+        humihex = data[6:8]
+        temphex = data[4:6]
+        temp10 = int.from_bytes(temphex, byteorder='little')
+        humi10 = int.from_bytes(humihex, byteorder='little')
+        self._temperature = float(temp10) / 100.0
+        self._humidity = float(humi10) / 100.0
+
+    def _battery_update_callback(self, characteristic: BleakGATTCharacteristic, data: bytearray):
+        _LOGGER.debug("got battery data: %s", data.hex())
+        battery10 = data[4]
+        self._battery = float(battery10) / 10.0
+
     async def update(self, update_battery=True):
         self._lock.acquire()
         try:
             await self._ensure_connected()
+
+            await self._client.start_notify(SERVICE_UUID, self._sensors_update_callback)
             await self._client.write_gatt_char(SERVICE_UUID,
-                                                      b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
-            data = await self._client.read_gatt_char(SERVICE_UUID)
-            humihex = data[6:8]
-            temphex = data[4:6]
-            temp10 = int.from_bytes(temphex, byteorder='little')
-            humi10 = int.from_bytes(humihex, byteorder='little')
-            self._temperature = float(temp10) / 100.0
-            self._humidity = float(humi10) / 100.0
+                                               b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
+            await asyncio.sleep(0.5)
+            await self._client.stop_notify(SERVICE_UUID)
+
             if update_battery:
+                await self._client.start_notify(SERVICE_UUID, self._battery_update_callback)
                 await self._client.write_gatt_char(SERVICE_UUID,
-                                                          b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
-                                                          True)
-                data = await self._client.read_gatt_char(SERVICE_UUID)
-                battery10 = data[4]
-                self._battery = float(battery10) / 10.0
+                                                   b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
+                                                   True)
+                await asyncio.sleep(0.5)
+                await self._client.stop_notify(SERVICE_UUID)
+
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {%s}", ex)
         finally:
