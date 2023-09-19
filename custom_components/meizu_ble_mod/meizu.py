@@ -100,11 +100,13 @@ class MZBtIr(object):
             _LOGGER.debug("sending read sensors command")
             await self._client.write_gatt_char(SERVICE_UUID,
                                                b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
+            asyncio.sleep(0.2)
             if update_battery:
                 _LOGGER.debug("sending read battery command")
                 await self._client.write_gatt_char(SERVICE_UUID,
                                                    b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
                                                    True)
+                asyncio.sleep(0.2)
 
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {%s}", ex)
