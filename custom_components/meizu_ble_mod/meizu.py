@@ -88,20 +88,26 @@ class MZBtIr(object):
         self._lock.acquire()
         try:
             await self._ensure_connected()
-
+            _LOGGER.debug("enable sensor update notification")
             await self._client.start_notify(SERVICE_UUID, self._sensors_update_callback)
+            _LOGGER.debug("sending read sensors command")
             await self._client.write_gatt_char(SERVICE_UUID,
                                                b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
+            _LOGGER.debug("wait for 0.2s")
             await asyncio.sleep(0.2)
+            _LOGGER.debug("stop notification")
             await self._client.stop_notify(SERVICE_UUID)
 
             if update_battery:
+                _LOGGER.debug("enable battery update notification")
                 await self._client.start_notify(SERVICE_UUID, self._battery_update_callback)
+                _LOGGER.debug("sending read battery command")
                 await self._client.write_gatt_char(SERVICE_UUID,
                                                    b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
                                                    True)
-                await asyncio.sleep(0.2)
+                _LOGGER.debug("wait for 0.2s")
                 await self._client.stop_notify(SERVICE_UUID)
+                _LOGGER.debug("stop notification")
 
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {%s}", ex)
