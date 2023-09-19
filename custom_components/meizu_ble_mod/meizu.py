@@ -33,9 +33,12 @@ class MZBtIr(object):
 
     async def _ensure_connected(self):
         if self._client is None:
+            _LOGGER.debug('creating client')
             self._client = BleakClient(self._ble_device)
         if self._client.is_connected:
+            _LOGGER.debug('client is already connected')
             return
+        _LOGGER.debug('try to connect')
         await self._client.connect()
 
     def get_sequence(self):
@@ -70,9 +73,9 @@ class MZBtIr(object):
         self._lock.acquire()
         try:
             await self._ensure_connected()
-            data = await self._client.write_gatt_char(SERVICE_UUID,
+            await self._client.write_gatt_char(SERVICE_UUID,
                                                       b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
-            # data = await self._client.read_gatt_char(SERVICE_UUID)
+            data = await self._client.read_gatt_char(SERVICE_UUID)
             humihex = data[6:8]
             temphex = data[4:6]
             temp10 = int.from_bytes(temphex, byteorder='little')
@@ -80,10 +83,10 @@ class MZBtIr(object):
             self._temperature = float(temp10) / 100.0
             self._humidity = float(humi10) / 100.0
             if update_battery:
-                data = await self._client.write_gatt_char(SERVICE_UUID,
+                await self._client.write_gatt_char(SERVICE_UUID,
                                                           b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
                                                           True)
-                # data = await self._client.read_gatt_char(SERVICE_UUID)
+                data = await self._client.read_gatt_char(SERVICE_UUID)
                 battery10 = data[4]
                 self._battery = float(battery10) / 10.0
         except Exception as ex:
