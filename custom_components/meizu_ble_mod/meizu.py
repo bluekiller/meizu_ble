@@ -74,8 +74,8 @@ class MZBtIr(object):
 
     def _sensors_update_callback(self, characteristic: BleakGATTCharacteristic, data: bytearray):
         _LOGGER.debug(characteristic)
-        _LOGGER.debug("got sensor data: %s", data.hex())
-        if data[0:3] == 0x5507:
+        _LOGGER.debug("got data: %s", data.hex())
+        if data[0:2] == b"\x55\x07":
             _LOGGER.debug("got temperature and humidity data")
             humihex = data[6:8]
             temphex = data[4:6]
@@ -85,11 +85,13 @@ class MZBtIr(object):
             self._humidity = float(humi10) / 100.0
             _LOGGER.debug("temperature: %s", self._temperature)
             _LOGGER.debug("humidity: %s", self._humidity)
-        else:
+        elif data[0:2] == b"\x55\x04":
             _LOGGER.debug("got battery data")
             battery10 = data[4]
             self._battery = float(battery10) / 10.0
             _LOGGER.debug("battery: %s", self._battery)
+        else:
+            _LOGGER.debug("got unknown data")
 
     async def update(self, update_battery=True):
         self._lock.acquire()
