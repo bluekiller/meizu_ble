@@ -14,7 +14,6 @@ _LOGGER = logging.getLogger(__name__)
 
 
 async def async_setup_entry(hass: HomeAssistant, entry: ConfigEntry) -> bool:
-    hass.data[DOMAIN] = {}
     config = entry.data
     mac = config.get(CONF_MAC)
     ble_device = bluetooth.async_ble_device_from_address(hass, mac, connectable=True)

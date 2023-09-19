@@ -14,6 +14,7 @@ from homeassistant.const import (
     PERCENTAGE,
 )
 from homeassistant.core import HomeAssistant
+from homeassistant.exceptions import ConfigEntryNotReady
 from homeassistant.helpers.update_coordinator import CoordinatorEntity, DataUpdateCoordinator
 
 from .const import DOMAIN, VERSION
@@ -34,7 +35,11 @@ SENSOR_TYPES = {
 
 async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
     """Setup meizu ble sensor entry"""
-    client = hass.data[DOMAIN][entry.data.get(CONF_MAC)]
+    mac = entry.data.get(CONF_MAC)
+    client = hass.data[DOMAIN].get(mac)
+    if not client:
+        _LOGGER.error("Device[%s] is not found", mac)
+        raise ConfigEntryNotReady(f"Device[{mac}] is not found!")
     name = entry.data.get(CONF_NAME)
     coordinator = SensorCoordinator(hass, client, entry.data)
     dev = [
