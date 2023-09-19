@@ -41,6 +41,8 @@ class MZBtIr(object):
             return
         _LOGGER.debug('try to connect')
         await self._client.connect()
+        _LOGGER.debug("enable sensor update notification")
+        await self._client.start_notify(SERVICE_UUID, self._sensors_update_callback)
 
     def get_sequence(self):
         self._sequence += 1
@@ -71,43 +73,36 @@ class MZBtIr(object):
         return self._battery
 
     def _sensors_update_callback(self, characteristic: BleakGATTCharacteristic, data: bytearray):
+        _LOGGER.debug(characteristic)
         _LOGGER.debug("got sensor data: %s", data.hex())
-        humihex = data[6:8]
-        temphex = data[4:6]
-        temp10 = int.from_bytes(temphex, byteorder='little')
-        humi10 = int.from_bytes(humihex, byteorder='little')
-        self._temperature = float(temp10) / 100.0
-        self._humidity = float(humi10) / 100.0
-
-    def _battery_update_callback(self, characteristic: BleakGATTCharacteristic, data: bytearray):
-        _LOGGER.debug("got battery data: %s", data.hex())
-        battery10 = data[4]
-        self._battery = float(battery10) / 10.0
+        if data[0:3] == 0x5507:
+            _LOGGER.debug("got temperature and humidity data")
+            humihex = data[6:8]
+            temphex = data[4:6]
+            temp10 = int.from_bytes(temphex, byteorder='little')
+            humi10 = int.from_bytes(humihex, byteorder='little')
+            self._temperature = float(temp10) / 100.0
+            self._humidity = float(humi10) / 100.0
+            _LOGGER.debug("temperature: %s", self._temperature)
+            _LOGGER.debug("humidity: %s", self._humidity)
+        else:
+            _LOGGER.debug("got battery data")
+            battery10 = data[4]
+            self._battery = float(battery10) / 10.0
+            _LOGGER.debug("battery: %s", self._battery)
 
     async def update(self, update_battery=True):
         self._lock.acquire()
         try:
             await self._ensure_connected()
-            _LOGGER.debug("enable sensor update notification")
-            await self._client.start_notify(SERVICE_UUID, self._sensors_update_callback)
             _LOGGER.debug("sending read sensors command")
             await self._client.write_gatt_char(SERVICE_UUID,
                                                b'\x55\x03' + bytes([self.get_sequence()]) + b'\x11', True)
-            _LOGGER.debug("wait for 0.2s")
-            await asyncio.sleep(0.2)
-            _LOGGER.debug("stop notification")
-            await self._client.stop_notify(SERVICE_UUID)
-
             if update_battery:
-                _LOGGER.debug("enable battery update notification")
-                await self._client.start_notify(SERVICE_UUID, self._battery_update_callback)
                 _LOGGER.debug("sending read battery command")
                 await self._client.write_gatt_char(SERVICE_UUID,
                                                    b'\x55\x03' + bytes([self.get_sequence()]) + b'\x10',
                                                    True)
-                _LOGGER.debug("wait for 0.2s")
-                await self._client.stop_notify(SERVICE_UUID)
-                _LOGGER.debug("stop notification")
 
         except Exception as ex:
             _LOGGER.debug("Unexpected error: {%s}", ex)
