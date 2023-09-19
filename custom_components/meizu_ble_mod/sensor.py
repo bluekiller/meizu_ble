@@ -34,13 +34,9 @@ SENSOR_TYPES = {
 
 async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
     """Setup meizu ble sensor entry"""
-    config = entry.data
-    SENSOR_TYPES[SENSOR_TEMPERATURE][1] = hass.config.units.temperature_unit
-    name = config[CONF_NAME]
-    mac = config.get(CONF_MAC)
-    client = MZBtIr(homeassistant.components.bluetooth.async_ble_device_from_address(hass, mac, connectable=True))
-    hass.data[DOMAIN][mac] = client
-    coordinator = SensorCoordinator(hass, client, config)
+    client = hass.data[DOMAIN][entry.data.get(CONF_MAC)]
+    name = entry.data.get(CONF_NAME)
+    coordinator = SensorCoordinator(hass, client, entry.data)
     dev = [
         MeizuBLESensor(
             client,
@@ -65,12 +61,6 @@ async def async_setup_entry(hass: HomeAssistant, entry, async_add_entities):
     await coordinator.async_config_entry_first_refresh()
 
     async_add_entities(dev)
-
-
-async def async_unload_entry(hass, entry):
-    client = hass.data[DOMAIN].get(entry.data.get(CONF_MAC))
-    if client:
-        await client.close()
 
 
 class SensorCoordinator(DataUpdateCoordinator):

@@ -90,7 +90,7 @@ class MZBtIr(object):
                 battery10 = data[4]
                 self._battery = float(battery10) / 10.0
         except Exception as ex:
-            _LOGGER.debug("Unexpected error: {}", ex)
+            _LOGGER.debug("Unexpected error: {%s}", ex)
         finally:
             self._lock.release()
 
