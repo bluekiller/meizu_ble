@@ -12,6 +12,7 @@ from homeassistant.const import (
     DEVICE_CLASS_TEMPERATURE,
     DEVICE_CLASS_BATTERY,
     PERCENTAGE,
+    TEMP_CELSIUS,
 )
 from homeassistant.core import HomeAssistant
 from homeassistant.exceptions import ConfigEntryNotReady
@@ -27,7 +28,7 @@ SENSOR_HUMIDITY = "humidity"
 SENSOR_BATTERY = "battery"
 
 SENSOR_TYPES = {
-    SENSOR_TEMPERATURE: ["温度", None, DEVICE_CLASS_TEMPERATURE],
+    SENSOR_TEMPERATURE: ["温度", TEMP_CELSIUS, DEVICE_CLASS_TEMPERATURE],
     SENSOR_HUMIDITY: ["湿度", PERCENTAGE, DEVICE_CLASS_HUMIDITY],
     SENSOR_BATTERY: ["电量", PERCENTAGE, DEVICE_CLASS_BATTERY],
 }
